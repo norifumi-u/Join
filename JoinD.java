@@ -1,0 +1,38 @@
+package loop.Join;
+
+public class JoinD{
+    
+    public static void main(String[] args) throws Exception {
+	try (ScribServerSocket ss = new SocketChannelServer(7777)) {
+	    while (true) {
+		Join join = new Join();
+		try (MPSTEndpoint<Join, D> serverD) = new MPSTEndpoint<>(Join, D, new ObjectStreamFormatter()){
+			serverD.accept(ss, C);
+			serverD.accept(ss, B);
+			new JoinD().run(new Join_D_1(serverD));
+		    } catch (ScribbleRuntimeException | IOException | ClassNotFoundException e) {
+		    e.printStackTrace();
+		}
+	    }
+	}
+    }
+
+    private void run(Join_D_1 d1) throws Exception {
+	Buf<Integer> a = new Buf<>(0);
+	Buf<Integer> x = new Buf<>();
+	Buf<Integer> y = new Buf<>();
+	while (true) {
+	    Join_D_1_Cases cases = d1.branch(C);
+	    switch (cases.op) {
+	    case left: cases.receive(left, x);
+		a.val = a.val + x.val;
+		break;
+	    case right: cases.receive(right, y);
+		a.val = a.val + y.val;
+		return;
+	    }
+	}
+	d1.receive(B, join, x);
+	a.val += x.val
+    }
+}

@@ -1,0 +1,23 @@
+module loop.Join;
+
+type <java> "java.lang.Integer" from "rt.jar" as Int;
+
+global protocol Join(role A, role B, role C, role D) {
+  rec t {
+    choice at A {
+      left(Int) from A to B;
+      continue t;
+    } or {
+      right(Int) from A to B;
+    }
+  }
+  rec t1 {
+    choice at C {
+      left(Int) from C to D;
+      continue t1;
+    } or {
+      right(Int) from C to D;
+    }
+  }
+  join() from B to C;
+}

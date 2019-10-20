@@ -1,0 +1,25 @@
+package loop.Join;
+
+public class JoinA{
+    
+    public static void main(String[] args) throws Exception{
+	Join join = new Join();
+	try (MPSTEndpoint<Join, A> alice = new MPSTEndpoint<>(Join, A, new ObjectStreamFormatter())) {
+	    alice.connect(B, SocketChannelEndpoint::new, "localhost", 8888);
+	    int n = 5;
+	    System.out.println("sum = " + addA(new Join_A_1(alice), n));
+	}
+    }
+    
+    private static int addA(Join_A_1 a1, int n) throws Exception {
+	Buf<Integer> x = new Buf<>(1);
+	Buf<Integer> y = new Buf<>(10);
+	Buf<Integer> i = new Buf<>(1);
+	while (i.val < n) {
+	    a1.send(B, left, x.val);
+	    i.val = n+1;
+	}
+	a1.send(B, right, y.val);
+    }
+    
+}
