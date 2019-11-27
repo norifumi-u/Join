@@ -5,19 +5,24 @@ type <java> "java.lang.Integer" from "rt.jar" as Int;
 global protocol Join(role A, role B, role C, role D) {
   rec t {
     choice at A {
-      left(Int) from A to B;
+      left(Int,Int) from A to B;
+      Res(Int) from B to A;
       continue t;
     } or {
-      right(Int) from A to B;
+      right(Int,Int) from A to B;
+      Res(Int) from B to A;
     }
   }
   rec t1 {
     choice at C {
-      left(Int) from C to D;
+      left(Int,Int) from C to D;
+      Res(Int) from D to C;
       continue t1;
     } or {
-      right(Int) from C to D;
+      right(Int,Int) from C to D;
+      Res(Int) from D to C;
     }
   }
-  join(Int) from B to C;
+  join(Int) from A to C;
+  Res(Int) from C to A;
 }

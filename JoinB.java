@@ -1,40 +1,54 @@
 package loop.Join;
 
-public class JoinB{
-    
-    public static void main(String[] args) throws Exception {
-	try (ScribServerSocket ss = new SocketChannelServer(8888)) {
-	    while (true) {
-		Join join = new Join();
-		try (MPSTEndpoint<Join, B> serverB) = new MPSTEndpoint<>(Join, B, new ObjectStreamFormatter()){
-			serverB.accept(ss, A);
-			new JoinB().run(new Join_B_1(serverB));
-		    } catch (ScribbleRuntimeException | IOException | ClassNotFoundException e) {
-		    e.printStackTrace();
-		}
-		try (MPSTEndpoint<Join, B> bob = new MPSTEndpoint<>(Join, B, new ObjectStreamFormatter())){
-		    bob.connect(D, SocketChannelEndpoint::new, "localhost", 7777);
-		    System.out.println()
-		}
-	    }
-	}
-    }
+import static loop.Join.Join.Join.*;
 
-    private void run(Join_B_1 b1) throws Exception {
-	Buf<Integer> a = new Buf<>(0);
-	Buf<Integer> x = new Buf<>(0);
-	Buf<Integer> y = new Buf<>(0);
-	while (true) {
-	    Join_B_1_Cases cases = b1.branch(A);
-	    switch (cases.op) {
-	    case left: cases.receive(left, x);
-		a.val = a.val + x.val;
-		break;
-	    case right: cases.receive(right, y);
-		a.val = a.val + y.val;
-		return;
-	    }
+import java.io.IOException;
+
+import org.scribble.main.ScribRuntimeException;
+import org.scribble.runtime.message.ObjectStreamFormatter;
+import org.scribble.runtime.net.ScribServerSocket;
+import org.scribble.runtime.net.SocketChannelServer;
+import org.scribble.runtime.session.MPSTEndpoint;
+import org.scribble.runtime.util.Buf;
+
+import loop.Join.Join.Join;
+import loop.Join.Join.roles.B;
+import loop.Join.Join.statechans.B.Join_B_1;
+import loop.Join.Join.statechans.B.Join_B_1_Cases;
+
+public class JoinB {
+
+	public static void main(String[] args) throws Exception {
+		try (ScribServerSocket ss = new SocketChannelServer(8888)) {
+			run(ss);
+		}
 	}
-	b1.send(D, join, a);
-    }
+
+	public static void run(ScribServerSocket ss) throws Exception {
+		while (true) {
+			Join join = new Join();
+			try (MPSTEndpoint<Join, B> serverB = new MPSTEndpoint<>(join, B, new ObjectStreamFormatter())) {
+				serverB.accept(ss, A);
+				new JoinB().run(new Join_B_1(serverB));
+			} catch (ScribRuntimeException | IOException | ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private void run(Join_B_1 b1) throws Exception {
+		Buf<Integer> x = new Buf<>();
+		Buf<Integer> y = new Buf<>();
+		while (true) {
+			Join_B_1_Cases cases = b1.branch(A);
+			switch (cases.op) {
+			case left:
+				b1 = cases.receive(left, x, y).send(A, Res, x.val + y.val);
+				break;
+			case right:
+				cases.receive(right, x, y).send(A, Res, x.val + y.val);
+				return;
+			}
+		}
+	}
 }
